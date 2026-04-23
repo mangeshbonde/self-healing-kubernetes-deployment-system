@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crash-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crash-app
+  template:
+    metadata:
+      labels:
+        app: crash-app
+    spec:
+      containers:
+      - name: crash-app
+        image: crash-app
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3000
