@@ -1,7 +1,8 @@
 import time
 from kubernetes import client, config
+from log_analyzer import analyze_pod
 
-# Load kubeconfig (from ~/.kube/config)
+# Load kubeconfig
 config.load_kube_config()
 
 v1 = client.CoreV1Api()
@@ -13,24 +14,26 @@ def check_pods():
         name = pod.metadata.name
         namespace = pod.metadata.namespace
 
-        # Check container status
         if pod.status.container_statuses:
             for container in pod.status.container_statuses:
 
-                # Check waiting state (CrashLoopBackOff, Error)
                 if container.state.waiting:
                     reason = container.state.waiting.reason
 
                     if reason in ["CrashLoopBackOff", "Error"]:
-                        print("===================================")
+                        print("\n===================================")
                         print(f"🚨 Pod Failure Detected!")
                         print(f"Pod: {name}")
                         print(f"Namespace: {namespace}")
                         print(f"Reason: {reason}")
+
+                        # 🔥 CALL ANALYZER
+                        analyze_pod(name, namespace)
+
                         print("===================================")
 
 def main():
-    print("Starting Kubernetes Watcher...")
+    print("Starting Kubernetes Watcher with Log Analyzer...")
     while True:
         check_pods()
         time.sleep(5)
