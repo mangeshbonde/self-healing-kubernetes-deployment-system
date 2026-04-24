@@ -2,6 +2,7 @@ import time
 from kubernetes import client, config
 from log_analyzer import analyze_pod
 from healer import decide_and_heal
+from metrics import record_failure
 
 # Load kubeconfig
 config.load_kube_config()
@@ -28,16 +29,19 @@ def check_pods():
                         print(f"Namespace: {namespace}")
                         print(f"Reason: {reason}")
 
-                        # Analyze
+                        # Analyze logs
                         result = analyze_pod(name, namespace)
 
-                        # Heal
+                        # Record failure
+                        record_failure(name, namespace, reason, result)
+
+                        # Heal system
                         decide_and_heal(name, namespace, result)
 
                         print("===================================")
 
 def main():
-    print("Starting Self-Healing Kubernetes System...")
+    print("Starting Self-Healing System with Metrics Tracking...")
     while True:
         check_pods()
         time.sleep(5)
