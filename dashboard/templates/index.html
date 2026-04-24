@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kubernetes Self-Healing Dashboard</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #334155;
+        }
+
+        th {
+            background: #1e293b;
+        }
+
+        tr:nth-child(even) {
+            background: #1e293b;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🚀 Self-Healing Kubernetes Dashboard</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Pod</th>
+            <th>Namespace</th>
+            <th>Reason</th>
+            <th>Analysis</th>
+        </tr>
+    </thead>
+    <tbody id="data"></tbody>
+</table>
+
+<script>
+async function loadData() {
+    const res = await fetch('/api/metrics');
+    const data = await res.json();
+
+    const table = document.getElementById("data");
+    table.innerHTML = "";
+
+    data.reverse().forEach(item => {
+        const row = `
+            <tr>
+                <td>${item.timestamp}</td>
+                <td>${item.pod}</td>
+                <td>${item.namespace}</td>
+                <td>${item.reason}</td>
+                <td>${item.analysis}</td>
+            </tr>
+        `;
+        table.innerHTML += row;
+    });
+}
+
+setInterval(loadData, 3000);
+loadData();
+</script>
+
+</body>
+</html>
