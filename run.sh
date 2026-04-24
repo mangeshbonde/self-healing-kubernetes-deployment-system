@@ -2,21 +2,26 @@
 
 echo "🚀 Starting Self-Healing System..."
 
-# Start watcher
+# Activate venv
 cd automation
 source venv/bin/activate
+
+# Start watcher in background
+echo "Starting watcher..."
 python3 watcher.py &
 WATCHER_PID=$!
 
-echo "Watcher running..."
-
 # Start dashboard
 cd ../dashboard
+echo "Starting dashboard..."
 python3 app.py &
 DASHBOARD_PID=$!
 
-echo "Dashboard running..."
+echo ""
+echo "===================================="
+echo "System is running ✅"
+echo "Dashboard: http://<EC2-IP>:5000"
+echo "===================================="
 
-echo "🌐 Access Dashboard at: http://<EC2-IP>:5000"
-
+# Keep script running
 wait

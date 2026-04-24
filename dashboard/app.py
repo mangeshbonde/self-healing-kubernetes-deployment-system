@@ -4,7 +4,8 @@ import os
 
 app = Flask(__name__)
 
-METRICS_FILE = "../automation/metrics.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+METRICS_FILE = os.path.join(BASE_DIR, "../automation/metrics.json")
 
 def load_metrics():
     if not os.path.exists(METRICS_FILE):
