@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "🚀 Setting up Self-Healing Kubernetes System..."
+echo "🚀 Starting Project Setup..."
 
 # Update system
-sudo apt update -y
+sudo apt update
 
 # Install dependencies
 sudo apt install -y python3 python3-venv python3-pip docker.io curl
@@ -12,16 +12,16 @@ sudo apt install -y python3 python3-venv python3-pip docker.io curl
 sudo systemctl start docker
 sudo systemctl enable docker
 
-# Install kind
+# Install kind (if not exists)
 if ! command -v kind &> /dev/null
 then
-    echo "Installing kind..."
+    echo "Installing Kind..."
     curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
     chmod +x ./kind
     sudo mv ./kind /usr/local/bin/kind
 fi
 
-# Install kubectl
+# Install kubectl (if not exists)
 if ! command -v kubectl &> /dev/null
 then
     echo "Installing kubectl..."
@@ -30,12 +30,9 @@ then
     sudo mv kubectl /usr/local/bin/
 fi
 
-# Create cluster (only if not exists)
-if ! kind get clusters | grep -q "self-healing-cluster"
-then
-    echo "Creating Kubernetes cluster..."
-    kind create cluster --name self-healing-cluster
-fi
+# Create Kubernetes cluster
+echo "Creating Kubernetes cluster..."
+kind create cluster --name self-healing-cluster
 
 # Build Docker image
 echo "Building Docker image..."
@@ -46,27 +43,20 @@ cd ..
 # Load image into kind
 kind load docker-image crash-app --name self-healing-cluster
 
-# Deploy app
+# Deploy Kubernetes resources
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 
 # Setup Python environment
 cd automation
-
-if [ ! -d "venv" ]; then
-    python3 -m venv venv
-fi
-
+python3 -m venv venv
 source venv/bin/activate
-
 pip install --upgrade pip
-pip install -r ../requirements.txt
+pip install kubernetes flask
 
-# Initialize metrics file safely
-if [ ! -f "metrics.json" ]; then
-    echo "[]" > metrics.json
-fi
+# Initialize metrics file
+echo "[]" > metrics.json
 
 cd ..
 
-echo "✅ Setup completed successfully!"
+echo "✅ Setup Complete!"
